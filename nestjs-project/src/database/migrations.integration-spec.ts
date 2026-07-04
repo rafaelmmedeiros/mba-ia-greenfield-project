@@ -37,6 +37,14 @@ describe('Database migrations (integration)', () => {
       ),
       dataSource.query(`DROP TABLE IF EXISTS "migrations" CASCADE`),
     ]);
+
+    // A sibling integration suite may have built the schema via `synchronize: true`,
+    // which creates this enum type outside the migration lifecycle. `DROP TABLE` does
+    // not remove the type, so the migration's `CREATE TYPE` would fail with
+    // "already exists". Drop it explicitly so the migration runner starts pristine.
+    await dataSource.query(
+      `DROP TYPE IF EXISTS "verification_tokens_type_enum" CASCADE`,
+    );
   });
 
   afterAll(async () => {
