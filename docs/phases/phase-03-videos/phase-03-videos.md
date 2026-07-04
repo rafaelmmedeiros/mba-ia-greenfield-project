@@ -519,24 +519,24 @@ Linearized implementation order: SI-03.1 → SI-03.2 → SI-03.3 → SI-03.4 →
 
 ## Deliverables
 
-- [ ] SI-03.1 — Infra: object storage, fila e worker no Compose + config/env
-- [ ] SI-03.2 — Entidade Video + migration CreateVideos
-- [ ] SI-03.3 — StorageModule (S3/MinIO: multipart + presigned)
-- [ ] SI-03.4 — QueueModule (BullMQ + Redis)
-- [ ] SI-03.5 — Upload init: pré-cadastro do rascunho + multipart presigned
-- [ ] SI-03.6 — Upload complete + abort: enfileira o processamento
-- [ ] SI-03.7 — Video worker: standalone context + processor (ffprobe + thumbnail)
-- [ ] SI-03.8 — Watch / streaming / download (presigned GET)
-- [ ] SI-03.9 — E2E do pipeline completo + coerência do Error Catalog
-- [ ] SI-03.10 — Documentação de IA (CLAUDE.md) + Definition of Done
+- [x] SI-03.1 — Infra: object storage, fila e worker no Compose + config/env
+- [x] SI-03.2 — Entidade Video + migration CreateVideos
+- [x] SI-03.3 — StorageModule (S3/MinIO: multipart + presigned)
+- [x] SI-03.4 — QueueModule (BullMQ + Redis)
+- [x] SI-03.5 — Upload init: pré-cadastro do rascunho + multipart presigned
+- [x] SI-03.6 — Upload complete + abort: enfileira o processamento
+- [x] SI-03.7 — Video worker: standalone context + processor (ffprobe + thumbnail)
+- [x] SI-03.8 — Watch / streaming / download (presigned GET)
+- [x] SI-03.9 — E2E do pipeline completo + coerência do Error Catalog
+- [x] SI-03.10 — Documentação de IA (CLAUDE.md) + Definition of Done
 
 **Full test suites & Definition of Done** (rodadas dentro do container, per `nestjs-project/CLAUDE.md`):
 
-- [ ] Infra sobe no Compose (`cd nestjs-project && docker compose up -d` — `db`, `mailpit`, `minio`, `redis`, `video-worker` saudáveis)
-- [ ] Testes unit+integration passam (`docker compose exec nestjs-api npm test -- --runInBand`)
-- [ ] Testes e2e passam (`docker compose exec nestjs-api npm run test:e2e`)
-- [ ] Type-check passa (`docker compose exec nestjs-api npx tsc --noEmit`)
-- [ ] Lint passa (`docker compose exec nestjs-api npm run lint`)
-- [ ] Build compila (`docker compose exec nestjs-api npm run build`)
-- [ ] Entregáveis do enunciado: upload de até 10GB funcional, processamento automático, streaming funcionando e URLs únicas geradas
-- [ ] `CLAUDE.md` (raiz + `nestjs-project/`) coerentes com o código entregue
+- [x] Infra sobe no Compose (`cd nestjs-project && docker compose up -d` — `db`, `mailpit`, `minio`, `redis`, `video-worker` saudáveis)
+- [x] Testes unit+integration passam (`docker compose exec nestjs-api npm test -- --runInBand`) — 32 suites / 186 testes
+- [x] Testes e2e passam (`docker compose exec nestjs-api npm run test:e2e`) — 5 suites / 65 testes
+- [x] Type-check passa (`docker compose exec nestjs-api npx tsc --noEmit`)
+- [x] Lint passa (`docker compose exec nestjs-api npm run lint`)
+- [x] Build compila (`docker compose exec nestjs-api npm run build`)
+- [x] Entregáveis do enunciado: upload de até 10GB funcional, processamento automático, streaming funcionando e URLs únicas geradas
+- [x] `CLAUDE.md` (raiz + `nestjs-project/`) coerentes com o código entregue
