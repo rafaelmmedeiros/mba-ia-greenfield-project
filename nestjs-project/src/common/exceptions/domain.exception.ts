@@ -48,3 +48,41 @@ export class TokenReuseDetectedException extends DomainException {
     );
   }
 }
+
+export class InvalidFileSizeException extends DomainException {
+  constructor() {
+    super(
+      'INVALID_FILE_SIZE',
+      400,
+      'File size must be between 1 byte and 10 GiB',
+    );
+  }
+}
+
+export class VideoNotFoundException extends DomainException {
+  constructor() {
+    super('VIDEO_NOT_FOUND', 404, 'Video not found');
+  }
+}
+
+export class NotVideoOwnerException extends DomainException {
+  constructor() {
+    super('NOT_VIDEO_OWNER', 403, 'You do not own this video');
+  }
+}
+
+export class InvalidUploadStateException extends DomainException {
+  constructor() {
+    super(
+      'INVALID_UPLOAD_STATE',
+      409,
+      'The upload is not in a valid state for this operation',
+    );
+  }
+}
+
+export class VideoNotReadyException extends DomainException {
+  constructor() {
+    super('VIDEO_NOT_READY', 409, 'The video is not ready yet');
+  }
+}
