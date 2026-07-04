@@ -90,6 +90,9 @@
     "testEnvironment": "node",
     "setupFiles": [
       "dotenv/config"
-    ]
+    ],
+    "moduleNameMapper": {
+      "^@css-inline/css-inline$": "<rootDir>/test/stubs/css-inline-stub.ts"
+    }
   }
 }

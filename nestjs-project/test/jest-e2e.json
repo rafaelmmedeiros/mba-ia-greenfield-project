@@ -6,5 +6,8 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
-  "setupFiles": ["dotenv/config"]
+  "setupFiles": ["dotenv/config"],
+  "moduleNameMapper": {
+    "^@css-inline/css-inline$": "<rootDir>/../src/test/stubs/css-inline-stub.ts"
+  }
 }
