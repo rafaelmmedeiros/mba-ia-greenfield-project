@@ -44,6 +44,8 @@ _Subprojects in scope:_
 
 **Decision:** A (BullMQ + Redis)
 
+**Libraries:** bullmq, @nestjs/bullmq
+
 ---
 
 ## TD-02: Large-File Upload Strategy (up to 10GB)
@@ -100,6 +102,8 @@ _Subprojects in scope:_
 **Recommendation:** **Option A (AWS SDK v3)** — the project explicitly targets "S3-compatible, swap MinIO → S3 in production," and the AWS SDK is the portable, standard choice; MinIO is exercised locally purely via the `endpoint` override. Bucket/key layout (e.g., a single bucket with `videos/{videoId}/source.<ext>` and `videos/{videoId}/thumbnail.jpg`) is specified in the plan's Data/Events specs.
 
 **Decision:** A (AWS SDK v3)
+
+**Libraries:** @aws-sdk/client-s3, @aws-sdk/s3-request-presigner
 
 ---
 
@@ -188,6 +192,8 @@ _Subprojects in scope:_
 **Recommendation:** **Option A (nanoid)** — the standard, purpose-built short-id generator that matches the "short unique URL" intent; the only caveat is pinning the CommonJS-compatible v3 (resolved at `plan-resolve`). Option B (zero-dep `crypto`) is an equally valid, dependency-free alternative that sidesteps the ESM issue. Either way, keep the existing unique-violation retry pattern.
 
 **Decision:** A (nanoid — pin CommonJS v3)
+
+**Libraries:** nanoid
 
 ---
 

@@ -3,7 +3,8 @@ kind: phase
 name: phase-03-videos
 sources_mtime:
   docs/project-plan.md: "2026-07-04T12:32:06-03:00"
-  docs/decisions/technical-decisions-phase-03-videos.md: "2026-07-04T15:17:52-03:00"
+  docs/decisions/technical-decisions-phase-03-videos.md: "2026-07-04T15:48:33-03:00"
+  docs/phases/phase-03-videos/library-refs.md: "2026-07-04T15:51:48-03:00"
   docs/phases/phase-01-configuracao-base/context.md: "2026-07-04T12:32:06-03:00"
   docs/phases/phase-02-auth/context.md: "2026-07-04T12:32:06-03:00"
   .claude/skills/testing-guide-nestjs-project/SKILL.md: "2026-07-04T12:32:06-03:00"
@@ -46,12 +47,12 @@ sources_mtime:
 
 | Ref | Source | Scope | Topic | Status | Decision | Libraries |
 |-----|--------|-------|-------|--------|----------|-----------|
-| phase-03-videos/TD-01 | phase | Backend | Message Queue Technology | decided | A (BullMQ + Redis) | — |
+| phase-03-videos/TD-01 | phase | Backend | Message Queue Technology | decided | A (BullMQ + Redis) | bullmq, @nestjs/bullmq |
 | phase-03-videos/TD-02 | phase | Backend | Large-File Upload Strategy (10GB) | decided | A (S3 multipart presigned) | — |
-| phase-03-videos/TD-03 | phase | Backend | Object Storage Access — SDK & keys | decided | A (AWS SDK v3) | — |
+| phase-03-videos/TD-03 | phase | Backend | Object Storage Access — SDK & keys | decided | A (AWS SDK v3) | @aws-sdk/client-s3, @aws-sdk/s3-request-presigner |
 | phase-03-videos/TD-04 | phase | Backend | Video Worker Runtime & Packaging | decided | A (Standalone Nest application context) | — |
 | phase-03-videos/TD-05 | phase | Backend | Video Processing Tooling | decided | B (Direct `child_process`) | — |
-| phase-03-videos/TD-06 | phase | Backend | Unique Public Video URL Identifier | decided | A (nanoid — CJS v3) | — |
+| phase-03-videos/TD-06 | phase | Backend | Unique Public Video URL Identifier | decided | A (nanoid — CJS v3) | nanoid |
 | phase-03-videos/TD-07 | phase | Backend | Streaming & Download Delivery | decided | A (Presigned GET) | — |
 | phase-03-videos/TD-08 | phase | Backend | Video Status Lifecycle & Failure | decided | A (Enum + BullMQ retries) | — |
 
@@ -59,7 +60,7 @@ _Source files:_
 
 - phase-03-videos — `docs/decisions/technical-decisions-phase-03-videos.md` (scope_type: phase)
 
-_Libraries are pinned downstream by `plan-resolve` (→ `library-refs.md`); "—" here means not yet fixed._
+_New libraries are pinned in `library-refs.md` (via `plan-resolve` + Context7); "—" means the TD introduces no new npm dependency (native `child_process`, standalone Nest context, or reuses another TD's SDK)._
 
 ## Capability Coverage
 
