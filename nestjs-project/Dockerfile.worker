@@ -1,0 +1,11 @@
+FROM node:25.6.0-slim
+
+RUN apt update && apt install -y procps curl ffmpeg
+
+WORKDIR /home/node/app
+
+USER node
+
+# SI-03.1 keeps the worker container idle (built with FFmpeg, ready).
+# SI-03.7 flips this CMD to run the BullMQ worker (npm run start:worker).
+CMD [ "tail", "-f", "/dev/null" ]
