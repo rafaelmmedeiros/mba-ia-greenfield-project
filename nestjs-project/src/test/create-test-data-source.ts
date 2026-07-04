@@ -24,6 +24,16 @@ export function createTestDataSource(
 }
 
 export async function cleanAllTables(dataSource: DataSource): Promise<void> {
+  // `videos` is absent in specs whose DataSource does not include the Video entity
+  // (synchronize only creates known entities). Guard on existence so those specs'
+  // cleanup does not fail, while still deleting before `channels` (FK order) when present.
+  await dataSource.query(
+    `DO $$ BEGIN
+       IF to_regclass('public.videos') IS NOT NULL THEN
+         EXECUTE 'DELETE FROM "videos"';
+       END IF;
+     END $$;`,
+  );
   await dataSource.query('DELETE FROM "refresh_tokens"');
   await dataSource.query('DELETE FROM "verification_tokens"');
   await dataSource.query('DELETE FROM "channels"');

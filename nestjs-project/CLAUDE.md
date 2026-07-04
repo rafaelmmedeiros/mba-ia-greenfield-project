@@ -13,6 +13,10 @@ docker compose ps   # all services must show status "running"
 Then verify each infrastructure service is actually ready to accept connections — not just running:
 
 - **PostgreSQL:** `docker compose exec db pg_isready -U streamtube` — expect `accepting connections`
+- **MinIO (object storage):** `curl -f http://localhost:9000/minio/health/live` — expect HTTP 200 (also gated by the Compose healthcheck)
+- **Redis (queue):** `docker compose exec redis redis-cli ping` — expect `PONG`
+
+The `video-worker` service depends on `db`, `redis`, and `minio` being healthy, so a healthy stack means the worker is already consuming the `videos` queue.
 
 Only start the NestJS dev server (`npm run start:dev`) when the user **explicitly** asks to run the application — never as part of "start the environment".
 
@@ -34,6 +38,9 @@ docker compose exec nestjs-api npm run start:dev
 Services:
 - `nestjs-api` — NestJS API, port `3000`
 - `db` — PostgreSQL 17, port `5432`, database `streamtube`, user/password `streamtube`
+- `minio` — S3-compatible object storage, API `9000` / console `9001`, user/password `streamtube`, bucket `streamtube`
+- `redis` — Redis 7, port `6379`, backs the BullMQ `videos` queue
+- `video-worker` — standalone FFmpeg worker (`npm run start:worker`); consumes the `videos` queue and processes uploads (ffprobe + thumbnail)
 
 All verification and teardown commands run on the **host machine**:
 
@@ -148,6 +155,15 @@ NestJS with standard module structure. Source lives in `src/`, compiled output i
 
 - Each domain feature gets its own module (e.g., `UsersModule`, `VideosModule`) registered in `AppModule`
 - Controllers handle HTTP routing; Services hold business logic; both are scoped to their module
+
+### Video Pipeline
+
+The upload → processing → playback flow spans four modules plus a standalone worker:
+
+- **`VideosModule`** — REST endpoints under `/videos`: `POST /videos/uploads` (init multipart, pre-registers a `draft`), `POST /videos/:publicId/uploads/complete` (finalize + enqueue processing), `DELETE /videos/:publicId/uploads` (abort), `GET /videos/:publicId` (metadata — public once `ready`; the owner can poll earlier via optional auth), `GET /videos/:publicId/stream` and `GET /videos/:publicId/download` (presigned GET URLs; storage serves `Range`/`206` natively). Uploads go direct-to-storage (up to 10 GiB, 100 MiB parts) so large files never buffer through the API; each video gets a unique short `public_id` (nanoid).
+- **`StorageModule`** — `StorageService` wraps the AWS SDK v3 S3 client against MinIO (`forcePathStyle`): multipart upload with presigned parts, presigned GET (stream/download), and `putObject` (thumbnails). Bucket: `streamtube`.
+- **`QueueModule`** — BullMQ over Redis; the `videos` queue carries `process-video` jobs (`{ videoId }`, `attempts: 3`, exponential backoff).
+- **Video worker** (`src/worker/`) — a standalone Nest application context (`npm run start:worker`, the `video-worker` Compose service) running the `@Processor('videos')` `VideoProcessor`: probes duration/metadata (`ffprobe`) and extracts a thumbnail (`ffmpeg`), then transitions the video `processing → ready` (or `failed` after retries are exhausted).
 
 ## Code Conventions
 
