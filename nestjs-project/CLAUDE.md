@@ -38,7 +38,7 @@ docker compose exec nestjs-api npm run start:dev
 Services:
 - `nestjs-api` — NestJS API, port `3000`
 - `db` — PostgreSQL 17, port `5432`, database `streamtube`, user/password `streamtube`
-- `minio` — S3-compatible object storage, API `9000` / console `9001`, user/password `streamtube`, bucket `streamtube`
+- `minio` — S3-compatible object storage, API `9000` / console `9001`, user/password `streamtube`, bucket `streamtube-videos`
 - `redis` — Redis 7, port `6379`, backs the BullMQ `videos` queue
 - `video-worker` — standalone FFmpeg worker (`npm run start:worker`); consumes the `videos` queue and processes uploads (ffprobe + thumbnail)
 
@@ -161,7 +161,7 @@ NestJS with standard module structure. Source lives in `src/`, compiled output i
 The upload → processing → playback flow spans four modules plus a standalone worker:
 
 - **`VideosModule`** — REST endpoints under `/videos`: `POST /videos/uploads` (init multipart, pre-registers a `draft`), `POST /videos/:publicId/uploads/complete` (finalize + enqueue processing), `DELETE /videos/:publicId/uploads` (abort), `GET /videos/:publicId` (metadata — public once `ready`; the owner can poll earlier via optional auth), `GET /videos/:publicId/stream` and `GET /videos/:publicId/download` (presigned GET URLs; storage serves `Range`/`206` natively). Uploads go direct-to-storage (up to 10 GiB, 100 MiB parts) so large files never buffer through the API; each video gets a unique short `public_id` (nanoid).
-- **`StorageModule`** — `StorageService` wraps the AWS SDK v3 S3 client against MinIO (`forcePathStyle`): multipart upload with presigned parts, presigned GET (stream/download), and `putObject` (thumbnails). Bucket: `streamtube`.
+- **`StorageModule`** — `StorageService` wraps the AWS SDK v3 S3 client against MinIO (`forcePathStyle`): multipart upload with presigned parts, presigned GET (stream/download), and `putObject` (thumbnails). Bucket: `streamtube-videos`.
 - **`QueueModule`** — BullMQ over Redis; the `videos` queue carries `process-video` jobs (`{ videoId }`, `attempts: 3`, exponential backoff).
 - **Video worker** (`src/worker/`) — a standalone Nest application context (`npm run start:worker`, the `video-worker` Compose service) running the `@Processor('videos')` `VideoProcessor`: probes duration/metadata (`ffprobe`) and extracts a thumbnail (`ffmpeg`), then transitions the video `processing → ready` (or `failed` after retries are exhausted).
 
