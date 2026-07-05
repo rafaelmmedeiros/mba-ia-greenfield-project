@@ -31,6 +31,10 @@ docker compose up -d
 # Install dependencies (first time only)
 docker compose exec nestjs-api npm install
 
+# Apply database migrations (required before running the app or e2e —
+# schema is migration-managed, synchronize is off at runtime)
+docker compose exec nestjs-api npm run migration:run
+
 # Run the dev server (watch mode)
 docker compose exec nestjs-api npm run start:dev
 ```
