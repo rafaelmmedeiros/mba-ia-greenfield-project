@@ -35,23 +35,21 @@ describe('Database migrations (integration)', () => {
 
     await dataSource.initialize();
 
-    await Promise.all([
-      ...MANAGED_TABLES.map((table) =>
-        dataSource.query(`DROP TABLE IF EXISTS "${table}" CASCADE`),
-      ),
-      dataSource.query(`DROP TABLE IF EXISTS "migrations" CASCADE`),
-    ]);
+    // Drop sequentially, not with Promise.all: concurrent `DROP TABLE ... CASCADE`
+    // on FK-related tables can deadlock (two sessions lock parent/child in opposite
+    // order). Sequential DDL removes the race; CASCADE makes the order irrelevant.
+    for (const table of [...MANAGED_TABLES, 'migrations']) {
+      await dataSource.query(`DROP TABLE IF EXISTS "${table}" CASCADE`);
+    }
 
     // A sibling integration suite may have built the schema via `synchronize: true`,
     // which creates these enum types outside the migration lifecycle. `DROP TABLE`
     // does not remove a type, so the migrations' `CREATE TYPE` would fail with
     // "already exists". Drop them explicitly so the migration runner starts pristine.
-    await Promise.all([
-      dataSource.query(
-        `DROP TYPE IF EXISTS "verification_tokens_type_enum" CASCADE`,
-      ),
-      dataSource.query(`DROP TYPE IF EXISTS "videos_status_enum" CASCADE`),
-    ]);
+    await dataSource.query(
+      `DROP TYPE IF EXISTS "verification_tokens_type_enum" CASCADE`,
+    );
+    await dataSource.query(`DROP TYPE IF EXISTS "videos_status_enum" CASCADE`);
   });
 
   afterAll(async () => {
