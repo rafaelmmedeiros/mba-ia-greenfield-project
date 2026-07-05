@@ -127,4 +127,58 @@ describe('VideoProcessor (integration)', () => {
     const res = await fetch(thumbUrl);
     expect(res.ok).toBe(true);
   }, 30000);
+
+  async function seedVideoWithBadSource(): Promise<Video> {
+    const user = await dataSource.getRepository(User).save(
+      dataSource.getRepository(User).create({
+        email: `procbad_${++counter}@example.com`,
+        password: 'hashed',
+      }),
+    );
+    const channel = await dataSource.getRepository(Channel).save(
+      dataSource.getRepository(Channel).create({
+        name: 'C',
+        nickname: `procbad${counter}`,
+        user_id: user.id,
+      }),
+    );
+    const publicId = `procbad-${counter}`;
+    const key = `videos/${publicId}/source.mp4`;
+    // Upload bytes that are not a decodable video so ffprobe fails.
+    await storage.putObject(
+      key,
+      Buffer.from('this is definitely not a video file'),
+      'video/mp4',
+    );
+    return dataSource.getRepository(Video).save(
+      dataSource.getRepository(Video).create({
+        public_id: publicId,
+        channel_id: channel.id,
+        title: 'bad clip',
+        storage_key: key,
+        status: VideoStatus.PROCESSING,
+      }),
+    );
+  }
+
+  it('marks the video failed when the source is not processable (retries exhausted)', async () => {
+    const video = await seedVideoWithBadSource();
+    const job = {
+      data: { videoId: video.id },
+      attemptsMade: 3,
+      opts: { attempts: 3 },
+    } as Job<{ videoId: string }>;
+
+    // ffprobe rejects the invalid source, so processing throws.
+    await expect(processor.process(job)).rejects.toThrow();
+
+    // BullMQ fires 'failed' on the terminal attempt -> persist FAILED + reason.
+    await processor.onFailed(job, new Error('ffprobe: invalid data'));
+
+    const updated = await dataSource
+      .getRepository(Video)
+      .findOneByOrFail({ id: video.id });
+    expect(updated.status).toBe(VideoStatus.FAILED);
+    expect(updated.failure_reason).toBeTruthy();
+  }, 30000);
 });
